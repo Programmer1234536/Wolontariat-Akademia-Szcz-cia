@@ -39,7 +39,10 @@ def init():
     db("CREATE TABLE IF NOT EXISTS news(id INTEGER PRIMARY KEY, text TEXT)")
     db("CREATE TABLE IF NOT EXISTS chat(id INTEGER PRIMARY KEY, user TEXT, text TEXT)")
 
+init()
+
 # ---------- NO CACHE ----------
+
 @app.after_request
 def nocache(resp):
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -367,8 +370,3 @@ def accept(id):
 def reject(id):
     db("UPDATE users SET status='rejected' WHERE id=?", (id,))
     return redirect("/admin")
-
-# ---------- START ----------
-if __name__ == "__main__":
-    init()
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
