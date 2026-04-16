@@ -4,10 +4,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3, requests
 import os
 
-app = Flask(__name__, static_folder="static")
-app.secret_key = "secret"
-socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True)
+app = Flask(__name__)
 
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode="eventlet"
+)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "db.db")
 
