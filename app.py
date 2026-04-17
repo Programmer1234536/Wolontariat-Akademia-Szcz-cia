@@ -25,7 +25,17 @@ admins = {
 }
 
 # ---------- DB ----------
+def ensure_tables():
+    conn = sqlite3.connect(DB)
+    cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT, pass TEXT, status TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS news(id INTEGER PRIMARY KEY, text TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS chat(id INTEGER PRIMARY KEY, user TEXT, text TEXT)")
+    conn.commit()
+    conn.close()
+
 def db(q, args=(), one=False):
+    ensure_tables()
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
     cur.execute(q, args)
@@ -35,11 +45,15 @@ def db(q, args=(), one=False):
     return (r[0] if r else None) if one else r
 
 def init():
-    db("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT, pass TEXT, status TEXT)")
-    db("CREATE TABLE IF NOT EXISTS news(id INTEGER PRIMARY KEY, text TEXT)")
-    db("CREATE TABLE IF NOT EXISTS chat(id INTEGER PRIMARY KEY, user TEXT, text TEXT)")
+    ensure_tables()
+
+# Run at module load time so tables exist before the first request,
+# regardless of whether the app is started via __main__ or gunicorn.
+init()
+
 
 # ---------- NO CACHE ----------
+
 @app.after_request
 def nocache(resp):
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
