@@ -2,17 +2,12 @@ from flask import Flask, request, redirect, session, render_template_string
 from flask_socketio import SocketIO, emit
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3, requests
-import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
+app.secret_key = "secret"
+socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True)
 
-socketio = SocketIO(
-    app,
-    cors_allowed_origins="*",
-    async_mode="eventlet"
-)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB = os.path.join(BASE_DIR, "db.db")
+DB = "db.db"
 
 RECAPTCHA_SITE = "6LfYMrcsAAAAAFYxxW4GSs5-YssTT1l4touxMdL1"
 RECAPTCHA_SECRET = "6LfYMrcsAAAAAOZWz4bj3xbFG3VatfsvFxXTSCq8"
@@ -163,12 +158,9 @@ def home():
             <a href="/admin_login">Organizator</a>
         </nav>
     </header>
-    <title>Wolontariat Szkolny Akademia Szczęścia</title>
 
     <main>
-        <div class="card">Nasza misja❤️: Naszą misją jest pomaganie innym, prowadzimy korepetycje dla młodszcych uczniów, organizujemy akcje charetatywne, i wiele więcej! </div>
-
-         <div class="card">Przypominamy że uczniowie Niepublicznej Szkoły Postawowej Skala z odziałami itegracyjnymi jako jedyni mogą zgłosić się na wolontariusza(prośby z poza szkoły są usuwane)</div>
+        <div class="card">Historia wolontariatu ❤️</div>
 
         <div class="card">
             <b>📢 Aktualności</b>
@@ -371,4 +363,4 @@ def reject(id):
 # ---------- START ----------
 if __name__ == "__main__":
     init()
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, debug=True)
