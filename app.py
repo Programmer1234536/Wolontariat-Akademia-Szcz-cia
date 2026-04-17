@@ -25,19 +25,34 @@ admins = {
 }
 
 # ---------- DB ----------
+def init():
+    conn = sqlite3.connect(DB)
+    cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT, pass TEXT, status TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS news(id INTEGER PRIMARY KEY, text TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS chat(id INTEGER PRIMARY KEY, user TEXT, text TEXT)")
+    conn.commit()
+    conn.close()
+
 def db(q, args=(), one=False):
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
-    cur.execute(q, args)
+    try:
+        cur.execute(q, args)
+    except sqlite3.OperationalError as e:
+        conn.close()
+        if "no such table" in str(e):
+            init()
+            conn = sqlite3.connect(DB)
+            cur = conn.cursor()
+            cur.execute(q, args)
+        else:
+            raise
     conn.commit()
     r = cur.fetchall()
     conn.close()
     return (r[0] if r else None) if one else r
 
-def init():
-    db("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT, pass TEXT, status TEXT)")
-    db("CREATE TABLE IF NOT EXISTS news(id INTEGER PRIMARY KEY, text TEXT)")
-    db("CREATE TABLE IF NOT EXISTS chat(id INTEGER PRIMARY KEY, user TEXT, text TEXT)")
 
 # ---------- NO CACHE ----------
 @app.after_request
@@ -367,6 +382,11 @@ def accept(id):
 def reject(id):
     db("UPDATE users SET status='rejected' WHERE id=?", (id,))
     return redirect("/admin")
+
+# ---------- HEALTH ----------
+@app.route("/health")
+def health():
+    return "OK", 200
 
 # ---------- START ----------
 if __name__ == "__main__":
