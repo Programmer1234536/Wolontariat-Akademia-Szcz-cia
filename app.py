@@ -160,7 +160,9 @@ def home():
     </header>
 
     <main>
-        <div class="card">Historia wolontariatu ❤️</div>
+        <div class="card">Nasze Motto❤️: Dajmy Innym Szczęście</div>
+
+        <div class="card">Przypominamy że uczniowie Niepublicznej Szkoły Podstawowej Skala Z Odziałami Integracyjnymi jako jedyni mogą zapisać się do wolontariatu(prośby z poza szkoły są usuwane)</div>
 
         <div class="card">
             <b>📢 Aktualności</b>
